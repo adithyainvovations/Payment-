@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Fund Collection</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #121212;
+            color: white;
+            text-align: center;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+            width: 90%;
+            max-width: 800px;
+            overflow: auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-shadow: 0px 0px 10px cyan;
+        }
+
+        button {
+            padding: 10px 18px;
+            margin: 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(45deg, #4CAF50, #2E8B57);
+            color: white;
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background: #45a049;
+            box-shadow: 0 0 10px cyan;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+            outline: none;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 15px cyan;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid white;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .status-paid {
+            background: #28a745;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #dc3545;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .scrollable {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #loginError {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="homePage" class="container">
+        <h1>Welcome Everyone</h1>
+        <button onclick="showLogin()">Admin Login</button>
+        <button onclick="showUser()">User View</button>
+    </div>
+
+    <div id="adminLogin" class="container hidden">
+        <h1>Admin Login</h1>
+        <input type="text" id="adminUsername" placeholder="Username"><br>
+        <input type="password" id="adminPassword" placeholder="Password"><br>
+        <p id="loginError" class="hidden">Invalid Username or Password!</p>
+        <button onclick="checkLogin()">Login</button>
+        <button onclick="goHome()">Back</button>
+    </div>
+
+    <div id="adminPanel" class="container hidden">
+        <h1>Admin Panel</h1>
+        <div class="scrollable">
+            <table id="studentTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <h3>Total: ₹<span id="totalAmount">0</span></h3>
+        <h3>Received: ₹<span id="receivedAmount">0</span></h3>
+        <h3>Remaining: ₹<span id="remainingAmount">0</span></h3>
+        <button onclick="goHome()">Logout</button>
+    </div>
+
+    <div id="userView" class="container hidden">
+        <h1>Student Payment Status</h1>
+        <div class="scrollable">
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <h3>Total: ₹<span id="userTotalAmount">0</span></h3>
+        <h3>Received: ₹<span id="userReceivedAmount">0</span></h3>
+        <h3>Remaining: ₹<span id="userRemainingAmount">0</span></h3>
+        <button onclick="goHome()">Back</button>
+    </div>
+
+    <script>
+        let students = JSON.parse(localStorage.getItem("students")) || Array.from({length: 49}, (_, i) => ({
+            name: `Student ${i + 1}`,
+            amount: 40,
+            status: "Pending"
+        }));
+
+        function updateTables() {
+            let total = students.reduce((sum, s) => sum + s.amount, 0);
+            let received = students.filter(s => s.status === "Paid").reduce((sum, s) => sum + s.amount, 0);
+            let remaining = total - received;
+
+            document.getElementById("totalAmount").innerText = total;
+            document.getElementById("receivedAmount").innerText = received;
+            document.getElementById("remainingAmount").innerText = remaining;
+
+            document.getElementById("userTotalAmount").innerText = total;
+            document.getElementById("userReceivedAmount").innerText = received;
+            document.getElementById("userRemainingAmount").innerText = remaining;
+
+            document.querySelector("#studentTable tbody").innerHTML = students.map((s, i) =>
+                `<tr>
+                    <td>${s.name}</td>
+                    <td>₹${s.amount}</td>
+                    <td class="${s.status === "Paid" ? "status-paid" : "status-pending"}">${s.status}</td>
+                    <td>
+                        <button onclick="markPaid(${i})" ${s.status === "Paid" ? 'disabled' : ''}>Mark Paid</button>
+                        <button onclick="unmarkPaid(${i})" ${s.status === "Pending" ? 'disabled' : ''}>Unmark</button>
+                    </td>
+                </tr>`).join("");
+
+            document.querySelector("#userTable tbody").innerHTML = students.map(s =>
+                `<tr><td>${s.name}</td><td class="${s.status === "Paid" ? "status-paid" : "status-pending"}">${s.status}</td></tr>`
+            ).join("");
+
+            localStorage.setItem("students", JSON.stringify(students));
+        }
+
+        function markPaid(i) { students[i].status = "Paid"; updateTables(); }
+        function unmarkPaid(i) { students[i].status = "Pending"; updateTables(); }
+        function checkLogin() { if (adminUsername.value === "admin" && adminPassword.value === "password123") { adminLogin.classList.add("hidden"); adminPanel.classList.remove("hidden"); updateTables(); } else { loginError.classList.remove("hidden"); } }
+        function showLogin() { homePage.classList.add("hidden"); adminLogin.classList.remove("hidden"); }
+        function showUser() { homePage.classList.add("hidden"); userView.classList.remove("hidden"); updateTables(); }
+        function goHome() { location.reload(); }
+
+        document.addEventListener("DOMContentLoaded", updateTables);
+    </script>
+</body>
+</html>
