@@ -183,11 +183,17 @@
     </div>
 
     <script>
-        let students = JSON.parse(localStorage.getItem("students")) || Array.from({length: 49}, (_, i) => ({
-            name: `Student ${i + 1}`,
-            amount: 40,
-            status: "Pending"
-        }));
+        let students = [
+            "A K Anish John", "Abhijith S Karma", "Abhishek B", "Adithya M", "Akhila B", "Akhila Madhu",
+            "Akhish S Panicker", "Amal S", "Amal S(2)", "Anjali Krishnan", "Anjitha R S", "Anuja S",
+            "Aparna S R", "Arun Reghunath", "Ashly Kunjumon", "Bharat Sanjeev", "Bibin V Santhosh",
+            "Edwin Reji Philip", "Fathima S", "Feba Alex", "Hari R Chandran", "Harinand G", "Ibin P George",
+            "J Mahadev", "Jerin Aji", "Jibin Benny", "Jincy Saji", "Jisha S", "Jisha P T", "Jishnu Prasad A",
+            "Jobin Joy", "Joel Joy", "Kezia Lotus", "Krishna Anil", "Krishna S", "Nandana M A", "Neethu Philip",
+            "Parvathy Sajeevkumar", "R L Jyothis", "Reshma Roy", "Richard Reji John", "S Ansal Muhammed",
+            "Sijo John", "Suhaila F", "Viknesh M", "Jesna K Saji", "Adithya A K", "Arya Pradeep", "Jacob Thomas"
+        ].map(name => ({ name, amount: 40, status: "Pending" }));
+        
 
         function updateTables() {
             let total = students.reduce((sum, s) => sum + s.amount, 0);
